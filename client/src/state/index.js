@@ -18,6 +18,10 @@ export const authSlice = createSlice({
       state.user = action.payload.user;
       state.token = action.payload.token;
     },
+    setGoogleLogin: (state, action) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+    },
     setLogout: (state) => {
       state.user = null;
       state.token = null;
@@ -42,6 +46,6 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setMode, setLogin, setLogout, setFriends, setPosts, setPost } =
+export const { setMode, setLogin, setGoogleLogin, setLogout, setFriends, setPosts, setPost } =
   authSlice.actions;
 export default authSlice.reducer;

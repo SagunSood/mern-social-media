@@ -41,5 +41,15 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add the findOrCreate method to the User model
+UserSchema.statics.findOrCreate = async function (conditions, doc) {
+  const user = await this.findOne(conditions);
+  if (user) {
+    return user;
+  } else {
+    return this.create(doc);
+  }
+};
+
 const User = mongoose.model("User", UserSchema);
 export default User;

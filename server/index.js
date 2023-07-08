@@ -19,21 +19,37 @@ import User from "./models/User.js";
 import Post from "./models/Post.js";
 import { users, posts } from "./data/index.js";
 import passport from "passport";
+//import "./config/passport.js"; // Import your Passport.js configuration file
+import session from "express-session";
+import { createProxyMiddleware } from 'http-proxy-middleware';
+
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
 const app = express();
+app.use(cors({
+  origin: ["http://localhost:3001","http://localhost:3000"], // Update this with the appropriate origin
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+app.use(
+  session({
+    secret: "Sagun's secret key",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
-app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
-app.use(passport.initialize());
 
 /* FILE STORAGE */
 const storage = multer.diskStorage({
@@ -46,11 +62,14 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+//app.use('/api', createProxyMiddleware({ target: 'http://localhost:3000', changeOrigin: true }));
+
 /* ROUTES WITH FILES */
 app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
 
 /* ROUTES */
+app.use(passport.initialize());
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);

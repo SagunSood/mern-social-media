@@ -12,10 +12,9 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setLogin } from "state";
+import { setLogin, setGoogleLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
-
 
 const registerSchema = yup.object().shape({
   firstName: yup.string().required("required"),
@@ -97,6 +96,86 @@ const Form = () => {
       navigate("/home");
     }
   };
+
+  // const handleGoogleLogin = async () => {
+  //   console.log("handleGoogleLogin")
+  //   try {
+  //     const response = await fetch(
+  //       "http://localhost:3001/oAuth/google/google",
+  //       {
+  //         method: "GET",
+  //       }
+  //     );
+  //     console.log("response", response)
+
+  //     if (!response.ok) {
+  //       throw new Error("Google login failed.");
+  //     }
+
+  //     const loggedIn = await response.json();
+
+  //     if (loggedIn) {
+  //       const { user, token } = loggedIn;
+  //       //const dispatch = useDispatch();
+  //       dispatch(setLogin({ user, token }));
+
+  //       navigate("/home");
+  //     }
+  //   } catch (error) {
+  //     console.error("Google login error:", error);
+  //   }
+  // };
+
+  // const handleGoogleLogin = () => {
+  //   window.location.href = "http://localhost:3001/oAuth/google/google"; // Redirect to the Google OAuth route on your server
+  // };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/oAuth/google/google", {
+        method: "GET",
+        redirect: "follow", // Enable automatic following of redirects
+      });
+  
+      if (!response.ok) {
+        throw new Error("Google login failed.");
+      }
+  
+      // Check if the response is a redirect
+      if (response.redirected) {
+        const redirectUrl = response.url; // Get the redirected URL
+        console.log("Redirect URL:", redirectUrl);
+  
+        // Initiate a new request to the redirect URL
+        const redirectResponse = await fetch(redirectUrl);
+        if (!redirectResponse.ok) {
+          throw new Error("Failed to follow redirect.");
+        }
+  
+        const loggedIn = await redirectResponse.json();
+        console.log("loggedIn", loggedIn);
+  
+        if (loggedIn) {
+          const { user, token } = loggedIn;
+          dispatch(setGoogleLogin({ user, token }));
+          navigate("/home");
+        }
+      } else {
+        const loggedIn = await response.json();
+        console.log("loggedIn", loggedIn);
+  
+        if (loggedIn) {
+          const { user, token } = loggedIn;
+          dispatch(setGoogleLogin({ user, token }));
+          navigate("/home");
+        }
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+    }
+  };
+  
+  
 
   const handleFormSubmit = async (values, onSubmitProps) => {
     if (isLogin) await login(values, onSubmitProps);
@@ -266,7 +345,18 @@ const Form = () => {
                 ? "Don't have an account? Sign Up here."
                 : "Already have an account? Login here."}
             </Typography>
-            <a class="button facebook" href="http://localhost:3001/oAuth/google/google">Sign in with Google</a>
+            <a
+              class="button facebook"
+              href="http://localhost:3001/oAuth/google/google"
+            >
+              Sign in with Google
+            </a>
+            <Button
+              variant="contained"
+              onClick={handleGoogleLogin}
+            >
+              Sign in with Google
+            </Button>            
           </Box>
         </form>
       )}
