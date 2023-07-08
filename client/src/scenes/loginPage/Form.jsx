@@ -266,7 +266,7 @@ const Form = () => {
                 ? "Don't have an account? Sign Up here."
                 : "Already have an account? Login here."}
             </Typography>
-            <a class="button facebook" href="http://localhost:3001/auth/google">Sign in with Facebook</a>
+            <a class="button facebook" href="http://localhost:3001/oAuth/google/google">Sign in with Google</a>
           </Box>
         </form>
       )}
